@@ -16,8 +16,8 @@ import java.io.File;
 public class HomePanel extends JPanel{
     private final JLabel titleLabel;
     private final JButton hostButton, joinButton;
-    private final ScrollingImagePanel topScrollPanel = new ScrollingImagePanel("C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\DUO_Back.png", true);
-    private final ScrollingImagePanel bottomScrollPanel = new ScrollingImagePanel("C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\DUO_Back.png", false);
+    private final ScrollingImagePanel topScrollPanel = new ScrollingImagePanel("src\\Assets\\DUO_Back.png", true);
+    private final ScrollingImagePanel bottomScrollPanel = new ScrollingImagePanel("src\\Assets\\DUO_Back.png", false);
 
 
     public HomePanel() {

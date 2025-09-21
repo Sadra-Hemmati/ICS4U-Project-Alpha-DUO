@@ -43,21 +43,21 @@ public class Constants {
 
     public static class Images {
         public static final Image ROYAL_BATTLE_BG = new ImageIcon(
-            "C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\Royal_Battle_BG.jpg").getImage()
+            "src\\Assets\\Royal_Battle_BG.jpg").getImage()
             .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
         public static final Image DUO_TITLE = new ImageIcon(
-            "C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\Duo_Title.png").getImage()
+            "src\\Assets\\Duo_Title.png").getImage()
             .getScaledInstance(Dimensions.TITLE_WIDTH, Dimensions.TITLE_HEIGHT, Image.SCALE_DEFAULT);
         public static final Image RACE_TARGET = new ImageIcon(
-            "C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\Duo_Title.png").getImage()
+            "src\\Assets\\Duo_Title.png").getImage()
             .getScaledInstance(Dimensions.RACE_TARGET_WIDTH, Dimensions.RACE_TARGET_HEIGHT, Image.SCALE_DEFAULT);
         public static final Image MATCH_BG = new ImageIcon(
-            "C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\Match_BG.png").getImage()
+            "src\\Assets\\Match_BG.png").getImage()
             .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
         // load images via ImageIcon synchronously and cache them
         private static final java.util.Map<String, Image> imageCache = new java.util.HashMap<>();
 
-        public static final Image DUO_CARD_BACK = loadImage("C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\Duo_Back.png");
+        public static final Image DUO_CARD_BACK = loadImage("src\\Assets\\Duo_Back.png");
 
         // cardName format: color_value e.g. red_5, blue_skip, green_reverse, yellow_draw2, wild_draw4
         // The image files are expected in src/Assets/DUO_CARDS/ with names like <cardName>_1.png
@@ -65,7 +65,7 @@ public class Constants {
             if (cardName == null || cardName.isEmpty()) {
                 throw new IllegalArgumentException("Invalid card name: " + cardName);
             }
-            String path = "C:\\Users\\sadra\\ICS4U\\Project-Alpha-Royal-Battle\\src\\Assets\\DUO_CARDS\\" + cardName + "_1.png";
+            String path = "src\\Assets\\DUO_CARDS\\" + cardName + "_1.png";
             return loadImage(path);
         }
 
