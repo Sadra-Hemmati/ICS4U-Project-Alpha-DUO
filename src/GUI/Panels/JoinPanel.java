@@ -110,6 +110,9 @@ public class JoinPanel extends JPanel {
 
     private void joinSelected() {
         String selected = serversList.getSelectedValue();
+        if (selected.endsWith(" (connected)")) {
+            selected = selected.substring(0, selected.indexOf(" (connected)"));
+        }
         int index = serversList.getSelectedIndex();
         if (selected == null || selected.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select a server to join.");

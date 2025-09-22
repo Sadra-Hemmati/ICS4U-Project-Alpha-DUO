@@ -213,6 +213,7 @@ public class GameServer {
             int connId = c.getID();
             Messages.StartDuoMatchMessage msg = new Messages.StartDuoMatchMessage();
             msg.serverStartTimeMillis = now;
+            msg.playerCount = conns.length;
             Integer assigned = connectionPlayerId.get(connId);
             msg.assignedPlayerId = (assigned == null) ? -1 : assigned;
             // include the starting hand for that player so client can render its cards

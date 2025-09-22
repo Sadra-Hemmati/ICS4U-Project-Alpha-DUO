@@ -15,7 +15,6 @@ import GUI.Panels.HomePanel;
 import GUI.Panels.HostPanel;
 import GUI.Panels.JoinPanel;
 import GUI.Panels.MatchPanel;
-import GUI.Panels.ResultPanel;
 import Network.NetworkManager;
 
 
@@ -24,14 +23,13 @@ public class GUI extends JFrame implements ActionListener{
     private final HostPanel hostPanel = new HostPanel();
     private final JoinPanel joinPanel = new JoinPanel();
     private final MatchPanel matchPanel = new MatchPanel();
-    private final ResultPanel resultPanel = new ResultPanel();
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel cardPanel = new JPanel(cardLayout);
 
     public GUI() {
        // JFrame setup
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setTitle("Royal Clash");
+        setTitle("DUO");
         setSize(Dimensions.WIDTH, Dimensions.HEIGHT);
         setResizable(false);
 
@@ -45,7 +43,6 @@ public class GUI extends JFrame implements ActionListener{
         cardPanel.add(hostPanel, "Host");
         cardPanel.add(joinPanel, "Join");
         cardPanel.add(matchPanel, "Match");
-        cardPanel.add(resultPanel, "Result");
 
         // when host presses Start Match, ask the server to start the match by sending a StartUnoMatchMessage
         hostPanel.setOnStartMatch(() -> {

@@ -5,7 +5,6 @@ import javax.swing.*;
 import Constants.Constants.Dimensions;
 import Constants.Constants.Images;
 import GUI.DuoRaceTarget;
-import Network.NetworkManager;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -62,6 +61,15 @@ public class MatchPanel extends JPanel{
 		public void setCard(Messages.DuoCard c) { this.card = c; repaint();}
 	}
 
+	private final JPanel layoutWrapper = new JPanel(new BorderLayout()){
+		Image backgroundImage = Images.MATCH_BG;
+
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawImage(backgroundImage, 0, 0, this);
+		}
+	};
 	private final TopCard topCardComponent = new TopCard();
 	private final JLabel handsLabel = new JLabel("Hands: -");
 	private final JButton drawButton = new JButton("Draw");
@@ -72,6 +80,7 @@ public class MatchPanel extends JPanel{
 	//used to detected when my turn starts, in case the server sends multiple state updates in one turn
 	private boolean wasMyTurn = false;
 	private int myPlayerId = -1;
+	private int playerCount = 2; //default to 2, will be updated on match start
 
 	// UI areas
 	// custom panel that spreads components evenly across available width
@@ -79,7 +88,20 @@ public class MatchPanel extends JPanel{
 		private final int cardW = Constants.Constants.Dimensions.CARD_WIDTH;
 		private final int cardH = Constants.Constants.Dimensions.CARD_HEIGHT;
 		private final boolean allowOverlap;
-		public SpreadPanel(boolean allowOverlap) { setOpaque(false); this.allowOverlap = allowOverlap; }
+		private final int cwRotation; // degrees clockwise rotation, 0 = none, 90 = vertical
+		
+		public SpreadPanel(boolean allowOverlap) {
+			setOpaque(false);
+			this.allowOverlap = allowOverlap;
+			this.cwRotation = 0;
+		}
+
+		public SpreadPanel(boolean allowOverlap, int ccwRotation) {
+			setOpaque(false);
+			this.allowOverlap = allowOverlap;
+			this.cwRotation = ccwRotation;
+		}
+
 		@Override
 		public void doLayout() {
 			int n = getComponentCount();
@@ -103,11 +125,36 @@ public class MatchPanel extends JPanel{
 		public Dimension getPreferredSize() {
 			int n = getComponentCount();
 			int w = n * cardW + (n + 1) * 4;
+			if (cwRotation == 90 || cwRotation == 270) {
+				return new Dimension(cardH + 30, w);
+			}
 			return new Dimension(w, cardH + 30);
+		}
+
+		@Override
+    	protected void paintComponent(Graphics g) {
+			Graphics2D g2d = (Graphics2D) g.create();
+
+			// Rotate 90 degrees clockwise around the center
+			g2d.rotate(Math.toRadians(cwRotation), getWidth() / 2.0, getHeight() / 2.0);
+			//paint(g2d);
+			super.paintComponent(g2d);
+			g2d.dispose();
+		}
+
+		@Override
+		protected void paintChildren(Graphics g) {
+			Graphics2D g2d = (Graphics2D) g.create();
+
+			// Rotate 90 degrees clockwise around the center
+			g2d.rotate(Math.toRadians(cwRotation), getWidth() / 2.0, getHeight() / 2.0);
+			//paint(g2d);
+			super.paintChildren(g2d);
+			g2d.dispose();
 		}
 	}
 
-	private final SpreadPanel opponentPanel = new SpreadPanel(true);
+	private SpreadPanel[] opponentPanels = null;
 	private final SpreadPanel handPanel = new SpreadPanel(false);
 
 	// local hand model
@@ -150,19 +197,20 @@ public class MatchPanel extends JPanel{
 			}
 
 			handsLabel.setText("Hands: " + handSizes.toString());
-			// update opponent display: show number of backs equal to opponent hand size (assumes 2 players)
-			opponentPanel.removeAll();
-			int opponentCount = 0;
-			if (handSizes != null) {
-				for (int i = 0; i < handSizes.size(); i++) {
-					if (i != myPlayerId) { opponentCount = handSizes.get(i); break; }
+			for (int i = 0; i < opponentPanels.length; i++) {
+				int opponentId = (myPlayerId + 1 + i) % playerCount;
+				opponentPanels[i].removeAll();
+				if (opponentId >= 0 && opponentId < handSizes.size()) {
+					int count = handSizes.get(opponentId);
+					for (int j = 0; j < count; j++) {
+						GUI.Card back = GUI.Card.createBack();
+						back.setPreferredSize(new Dimension(Constants.Constants.Dimensions.CARD_WIDTH, Constants.Constants.Dimensions.CARD_HEIGHT));
+						opponentPanels[i].add(back);
+					}
 				}
+				opponentPanels[i].revalidate(); opponentPanels[i].repaint();
 			}
-			for (int i = 0; i < opponentCount; i++) {
-				GUI.Card back = GUI.Card.createBack();
-				back.setPreferredSize(new Dimension(Constants.Constants.Dimensions.CARD_WIDTH, Constants.Constants.Dimensions.CARD_HEIGHT));
-				opponentPanel.add(back);
-			}
+
 
 			myHand.clear();
 			handPanel.removeAll();
@@ -174,7 +222,6 @@ public class MatchPanel extends JPanel{
 				}
 			}
 			handPanel.revalidate(); handPanel.repaint();
-			opponentPanel.revalidate(); opponentPanel.repaint();
 			// update my hand if changed
 			
 			
@@ -221,6 +268,31 @@ public class MatchPanel extends JPanel{
 
 	private final Network.GameClient.DuoStartHandler startHandler = m -> {
 		SwingUtilities.invokeLater(() -> {
+			opponentPanels = new SpreadPanel[m.playerCount - 1];
+
+			if (opponentPanels.length  == 1) {
+				opponentPanels[0] = new SpreadPanel(true);
+			}
+			else {
+				for (int i = 0; i < opponentPanels.length; i++) {
+					opponentPanels[i] = new SpreadPanel(true, 90*(i+1));
+				}
+			}
+			if (opponentPanels.length == 1) {
+				opponentPanels[0].setOpaque(false);
+				layoutWrapper.add(opponentPanels[0], BorderLayout.NORTH);
+			}
+			else{
+				String[] layoutPositions = {BorderLayout.WEST, BorderLayout.NORTH, BorderLayout.EAST};
+				for (int i = 0; i < opponentPanels.length; i++) {
+					SpreadPanel p = opponentPanels[i];
+					p.setOpaque(false);
+					layoutWrapper.add(p, layoutPositions[i]);
+				}
+			}
+			
+			playerCount = m.playerCount;
+
 			myPlayerId = m.assignedPlayerId;
 			Log.d("MatchPanel", "Start handler: assignedPlayerId=" + myPlayerId + " startingHandSize=" + (m.startingHand==null?0:m.startingHand.size()));
 			myHand.clear();
@@ -265,21 +337,9 @@ public class MatchPanel extends JPanel{
 	public MatchPanel() {
 		setSize(Dimensions.WIDTH, Dimensions.HEIGHT);
 
-		JPanel layoutWrapper = new JPanel(new BorderLayout()){
-			Image backgroundImage = Images.MATCH_BG;
-
-			@Override
-			protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				g.drawImage(backgroundImage, 0, 0, this);
-			}
-		};
-
 		layoutWrapper.setSize(Dimensions.WIDTH, Dimensions.HEIGHT);
 
 		setLayout(null);
-		opponentPanel.setOpaque(false);
-		layoutWrapper.add(opponentPanel, BorderLayout.NORTH);
 
 		JPanel centerContainer = new JPanel(new GridBagLayout());
 		centerContainer.setOpaque(false);

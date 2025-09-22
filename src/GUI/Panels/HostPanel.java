@@ -5,7 +5,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.IOException;
-import java.util.List;
 
 import Constants.Constants.Dimensions;
 import Network.NetworkManager;
@@ -119,7 +118,7 @@ public class HostPanel extends JPanel {
             // start a local client for the host so they appear like any other player
             try {
                 if (hostName != null) {
-                    Network.GameClient gc = NetworkManager.getInstance().startLocalClient(hostName);
+                    NetworkManager.getInstance().startLocalClient(hostName);
                     // if MatchPanel is present in the GUI it will have attached handlers when constructed; otherwise
                     // callers (GUI) can re-attach.
                 }
