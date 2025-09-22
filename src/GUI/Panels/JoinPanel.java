@@ -17,6 +17,8 @@ public class JoinPanel extends JPanel {
     private final JButton joinButton = new JButton("Join Selected");
     private final JButton backButton = new JButton("Back to Home");
 
+    private String connectedIP = null;
+
     public JoinPanel() {
         setLayout(new BorderLayout(0, 10));
         setMaximumSize(new Dimension(Dimensions.WIDTH, Dimensions.HEIGHT));
@@ -48,11 +50,17 @@ public class JoinPanel extends JPanel {
 
         scanButton.addActionListener(e -> scanServers());
         joinButton.addActionListener(e -> joinSelected());
+        backButton.addActionListener(e -> {
+            NetworkManager.getInstance().getClient().close();
+            connectedIP = null;
+            serversModel.clear();
+        });
     }
 
     public JButton getBackButton() {
         return backButton;
     }
+    
 
     private void scanServers() {
         serversModel.clear();
@@ -81,7 +89,12 @@ public class JoinPanel extends JPanel {
                 try {
                     List<InetAddress> found = get();
                     for (InetAddress a : found) {
-                        serversModel.addElement(a.getHostAddress());
+                        String addr = a.getHostAddress();
+                        if (connectedIP != null && addr.equals(connectedIP)) {
+                            serversModel.addElement(addr + " (connected)");
+                        } else {
+                            serversModel.addElement(addr);
+                        }
                     }
                     if (found.isEmpty()) {
                         serversModel.addElement("(no servers found)");
@@ -97,6 +110,7 @@ public class JoinPanel extends JPanel {
 
     private void joinSelected() {
         String selected = serversList.getSelectedValue();
+        int index = serversList.getSelectedIndex();
         if (selected == null || selected.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select a server to join.");
             return;
@@ -121,5 +135,15 @@ public class JoinPanel extends JPanel {
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Failed to connect: " + ex.getMessage());
         }
+
+        for (int i = 0; i < serversModel.size(); i++) {
+            String s = serversModel.get(i);
+            if (s.endsWith(" (connected)")) {
+                s = s.substring(0, s.indexOf(" (connected)"));
+                serversModel.set(i, s);
+            }
+        }
+        serversModel.set(index, selected + " (connected)");
+        connectedIP = selected;
     }
 }

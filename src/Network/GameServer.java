@@ -42,6 +42,7 @@ public class GameServer {
         Helpers.registerClasses(server.getKryo());
 
         server.addListener(new Listener() {
+
             @Override
             public void received(Connection connection, Object object) {
                 // simple username protocol via String
@@ -127,7 +128,17 @@ public class GameServer {
 
             @Override
             public void connected(Connection connection) {
+                if (server.getConnections().length > 4) {
+                    System.out.println("Rejecting connection with ID " + connection.getID() + ": server full.");
+                    kickConnection(connection, "SERVER FULL");
+                }
+                if (duoMatch != null) {
+                    System.out.println("Rejecting connection with ID " + connection.getID() + ": match already in progress.");
+                    kickConnection(connection, "MATCH ALREADY IN PROGRESS");
+                    return;
+                }
                 // nothing immediate; wait for USERNAME string
+                connection.sendTCP("CONNECTION ACCEPTED");
                 Log.i("GameServer", "connection connected id=" + connection.getID());
             }
 
@@ -162,15 +173,29 @@ public class GameServer {
         connectionNames.clear();
     }
 
+    public void kickConnection(Connection connection, String msg) {
+        if (connection != null) {
+            connection.sendTCP(msg);
+            connection.close();
+        }
+    }
+
     private synchronized void startUnoMatch() {
         if (duoMatch != null) return; // already running
 
         // Determine active connections (use server.getConnections() so we include any connected clients
         // whether or not they've yet sent a USERNAME string).
         com.esotericsoftware.kryonet.Connection[] conns = server.getConnections();
-        int players = conns.length;
-        if (players < 2) players = Math.max(2, players); // ensure at least 2
-        duoMatch = new Game.DuoMatch(players);
+        
+        if (conns.length > 4) {
+            for (int i = 4; i < conns.length; i++) {
+                System.out.println("Kicking extra player: " + conns[i].getID());
+                kickConnection(conns[i], "SERVER FULL");
+            }
+        }
+
+        // if (players < 2) players = Math.max(2, players); // ensure at least 2
+        duoMatch = new Game.DuoMatch(conns.length);
 
         // assign player ids to current connections deterministically in the order returned by server.getConnections()
         connectionPlayerId.clear();

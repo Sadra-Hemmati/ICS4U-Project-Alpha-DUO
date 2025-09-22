@@ -16,6 +16,7 @@ public class GameClient {
     // simple callback interfaces for UNO messages
     public interface DuoStateHandler { void onState(Messages.DuoStateMessage m); }
     public interface DuoStartHandler { void onStart(Messages.StartDuoMatchMessage m); }
+    private String serverConnectionResponse;
     
 
     // allow multiple listeners so UI and other components can all react to messages
@@ -23,6 +24,7 @@ public class GameClient {
     private final java.util.List<DuoStartHandler> startHandlers = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     public GameClient() {
+        serverConnectionResponse = null;
         client = new Client();
         Helpers.registerClasses(client.getKryo());
         client.start();
@@ -42,6 +44,11 @@ public class GameClient {
                     for (DuoStartHandler h : startHandlers) {
                         try { h.onStart(msg); } catch (Exception ignored) {}
                     }
+                }
+                if (object instanceof String) {
+                    String str = (String) object;
+                    serverConnectionResponse = str;
+                    Log.i("GameClient", "received Server Connection Response: " + str);
                 }
             }
         });
@@ -74,6 +81,10 @@ public class GameClient {
         try {
             client.stop();
         } catch (Exception ignored) {}
+    }
+
+    public String getServerConnectionResponse() {
+        return serverConnectionResponse;
     }
 
     // Backwards-compatible single-set semantics

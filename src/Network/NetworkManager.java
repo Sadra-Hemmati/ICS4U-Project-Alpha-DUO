@@ -83,6 +83,24 @@ public class NetworkManager {
     public synchronized void connectTo(InetAddress address, String username) throws IOException {
         if (client == null) client = new GameClient();
         client.connect(address);
+
+        //check that the connection is allowed, with a timeout of 5 seconds
+        Boolean connectionAllowed = null;
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < 5000) {
+            if (client.getServerConnectionResponse() != null) {
+                connectionAllowed = client.getServerConnectionResponse().equals("CONNECTION ACCEPTED");
+                break;
+            }
+            try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+        }
+
+        if (connectionAllowed == null) {
+            throw new IOException("Connection timed out");
+        } else if (!connectionAllowed) {
+            throw new IOException("Connection rejected by server: " + client.getServerConnectionResponse());
+        }
+
         client.setName(username);
         for (ClientCreatedListener l : clientCreatedListeners) try { l.onClientCreated(client); } catch (Exception ignored) {}
     }
@@ -90,6 +108,24 @@ public class NetworkManager {
     public synchronized void connectTo(String host, String username) throws IOException {
         if (client == null) client = new GameClient();
         client.connect(host);
+
+        //check that the connection is allowed, with a timeout of 5 seconds
+        Boolean connectionAllowed = null;
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < 5000) {
+            if (client.getServerConnectionResponse() != null) {
+                connectionAllowed = client.getServerConnectionResponse().equals("CONNECTION ACCEPTED");
+                break;
+            }
+            try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+        }
+
+        if (connectionAllowed == null) {
+            throw new IOException("Connection timed out");
+        } else if (!connectionAllowed) {
+            throw new IOException("Connection rejected by server: " + client.getServerConnectionResponse());
+        }
+
         client.setName(username);
         for (ClientCreatedListener l : clientCreatedListeners) try { l.onClientCreated(client); } catch (Exception ignored) {}
     }

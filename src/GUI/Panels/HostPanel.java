@@ -47,10 +47,10 @@ public class HostPanel extends JPanel {
         buttonsRow.add(stopButton);
         center.add(buttonsRow);
 
-        JLabel connectedPlayesHeader = new JLabel("Connected players (max 2):");
-        connectedPlayesHeader.setAlignmentX(CENTER_ALIGNMENT);
+        JLabel connectedPlayersHeader = new JLabel("Connected players (max 4):");
+        connectedPlayersHeader.setAlignmentX(CENTER_ALIGNMENT);
 
-        center.add(connectedPlayesHeader);
+        center.add(connectedPlayersHeader);
         playersList.setVisibleRowCount(4);
         center.add(new JScrollPane(playersList));
         JPanel startRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -158,7 +158,7 @@ public class HostPanel extends JPanel {
         // }
 
         for (String n : unique) {
-            if (added >= 2) break;
+            if (added >= 4) break;
             playersModel.addElement(n);
             added++;
         }
