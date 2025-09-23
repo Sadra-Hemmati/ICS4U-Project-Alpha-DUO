@@ -282,7 +282,7 @@ public class MatchPanel extends JPanel{
 			}
 			else {
 				for (int i = 0; i < opponentPanels.length; i++) {
-					opponentPanels[i] = new SpreadPanel(true, 90*(i+1));
+					opponentPanels[i] = new SpreadPanel(true, -180 + 90 * (i + 1));
 				}
 			}
 			if (opponentPanels.length == 1) {
