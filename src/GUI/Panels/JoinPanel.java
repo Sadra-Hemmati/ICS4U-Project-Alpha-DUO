@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.util.List;
 
 import Constants.Constants.Dimensions;
+import Network.GameClient;
 import Network.NetworkManager;
 
 public class JoinPanel extends JPanel {
@@ -51,7 +52,8 @@ public class JoinPanel extends JPanel {
         scanButton.addActionListener(e -> scanServers());
         joinButton.addActionListener(e -> joinSelected());
         backButton.addActionListener(e -> {
-            NetworkManager.getInstance().getClient().close();
+            GameClient client = NetworkManager.getInstance().getClient();
+            if (client != null) client.close();
             connectedIP = null;
             serversModel.clear();
         });

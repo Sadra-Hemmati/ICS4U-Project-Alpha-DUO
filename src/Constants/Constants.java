@@ -1,8 +1,12 @@
 package Constants;
 
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 
@@ -28,8 +32,9 @@ public class Constants {
     }
 
     public static class Dimensions {
-        public static final int HEIGHT = 900;
-        public static final int WIDTH = 500;
+        private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        public static final int HEIGHT = Math.min(900, screenSize.height - 200);
+        public static final int WIDTH = Math.min(500, screenSize.width - 200);
 
         public static final int TITLE_WIDTH = 400;
         public static final int TITLE_HEIGHT = 200;
@@ -41,44 +46,52 @@ public class Constants {
         public static final int RACE_TARGET_HEIGHT = 100;
     }
 
-    public static class Images {
-        public static final Image ROYAL_BATTLE_BG = new ImageIcon(
-            "src\\Assets\\Royal_Battle_BG.jpg").getImage()
-            .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
-        public static final Image DUO_TITLE = new ImageIcon(
-            "src\\Assets\\Duo_Title.png").getImage()
-            .getScaledInstance(Dimensions.TITLE_WIDTH, Dimensions.TITLE_HEIGHT, Image.SCALE_DEFAULT);
-        public static final Image RACE_TARGET = new ImageIcon(
-            "src\\Assets\\Duo_Title.png").getImage()
-            .getScaledInstance(Dimensions.RACE_TARGET_WIDTH, Dimensions.RACE_TARGET_HEIGHT, Image.SCALE_DEFAULT);
-        public static final Image MATCH_BG = new ImageIcon(
-            "src\\Assets\\Match_BG.png").getImage()
-            .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
-        // load images via ImageIcon synchronously and cache them
-        private static final java.util.Map<String, Image> imageCache = new java.util.HashMap<>();
+    public final class Images {
 
-        public static final Image DUO_CARD_BACK = loadImage("src\\Assets\\Duo_Back.png");
+        private Images() {} // prevent instantiation
 
-        // cardName format: color_value e.g. red_5, blue_skip, green_reverse, yellow_draw2, wild_draw4
-        // The image files are expected in src/Assets/DUO_CARDS/ with names like <cardName>_1.png
-        public static Image getDUOCardImage(String cardName) throws IllegalArgumentException {
+        // cache to avoid reloading the same image
+        private static final Map<String, Image> imageCache = new HashMap<>();
+
+        public static final Image ROYAL_BATTLE_BG = loadImage("/Assets/Royal_Battle_BG.jpg")
+                .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
+
+        public static final Image DUO_TITLE = loadImage("/Assets/Duo_Title.png")
+                .getScaledInstance(Dimensions.TITLE_WIDTH, Dimensions.TITLE_HEIGHT, Image.SCALE_DEFAULT);
+
+        public static final Image RACE_TARGET = loadImage("/Assets/Duo_Title.png")
+                .getScaledInstance(Dimensions.RACE_TARGET_WIDTH, Dimensions.RACE_TARGET_HEIGHT, Image.SCALE_DEFAULT);
+
+        public static final Image MATCH_BG = loadImage("/Assets/Match_BG.png")
+                .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
+
+        public static final Image DUO_CARD_BACK = loadImage("/Assets/Duo_Back.png");
+
+        // Card images, format: "red_5", "blue_skip", "wild_draw4", etc.
+        public static Image getDUOCardImage(String cardName) {
             if (cardName == null || cardName.isEmpty()) {
                 throw new IllegalArgumentException("Invalid card name: " + cardName);
             }
-            String path = "src\\Assets\\DUO_CARDS\\" + cardName + "_1.png";
+            String path = "/Assets/DUO_CARDS/" + cardName + "_1.png";
             return loadImage(path);
         }
 
         private static Image loadImage(String path) {
-            // simple cache to avoid reloading from disk every paint
             synchronized (imageCache) {
                 Image img = imageCache.get(path);
                 if (img != null) return img;
+
                 try {
-                    img = new ImageIcon(path).getImage();
+                    var url = Images.class.getResource(path);
+                    if (url == null) {
+                        throw new IllegalArgumentException("Resource not found: " + path);
+                    }
+                    img = new ImageIcon(url).getImage();
                 } catch (Exception e) {
-                    img = null;
+                    System.err.println("Failed to load image: " + path);
+                    img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB); // fallback
                 }
+
                 imageCache.put(path, img);
                 return img;
             }

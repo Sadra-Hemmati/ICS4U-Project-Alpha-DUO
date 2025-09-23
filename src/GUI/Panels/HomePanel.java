@@ -16,8 +16,8 @@ import java.io.File;
 public class HomePanel extends JPanel{
     private final JLabel titleLabel;
     private final JButton hostButton, joinButton;
-    private final ScrollingImagePanel topScrollPanel = new ScrollingImagePanel("src\\Assets\\DUO_Back.png", true);
-    private final ScrollingImagePanel bottomScrollPanel = new ScrollingImagePanel("src\\Assets\\DUO_Back.png", false);
+    private final ScrollingImagePanel topScrollPanel = new ScrollingImagePanel("/Assets/Duo_Back.png", true);
+    private final ScrollingImagePanel bottomScrollPanel = new ScrollingImagePanel("/Assets/Duo_Back.png", false);
 
 
     public HomePanel() {
@@ -73,7 +73,13 @@ public class HomePanel extends JPanel{
 
         public ScrollingImagePanel(String imagePath, boolean scrollLeft) {
             try {
-                BufferedImage original = ImageIO.read(new File(imagePath));
+                // resourcePath should look like "/Assets/yourImage.png"
+                var stream = getClass().getResourceAsStream(imagePath);
+                if (stream == null) {
+                    throw new IllegalArgumentException("Resource not found: " + imagePath);
+                }
+                BufferedImage original = ImageIO.read(stream);
+
                 // Rotate 90 degrees clockwise
                 image = transform(original);
 
