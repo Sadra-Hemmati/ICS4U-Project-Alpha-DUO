@@ -9,6 +9,7 @@ import GUI.DuoRaceTarget;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.Console;
 import java.util.ArrayList;
 
 import Util.Log;
@@ -26,7 +27,7 @@ public class MatchPanel extends JPanel{
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			if (card != null) {
-				Log.d("TopCard", "painting card: " + card.color + " " + card.value + (card.wildColor!=null?(" (wild as " + card.wildColor + ")"):""));
+				// Log.d("TopCard", "painting card: " + card.color + " " + card.value + (card.wildColor!=null?(" (wild as " + card.wildColor + ")"):""));
 
 				java.awt.Image img;
 				if (card.wildColor != null && card.color.equals("WILD")) {
@@ -62,19 +63,25 @@ public class MatchPanel extends JPanel{
 	}
 
 	private final JPanel layoutWrapper = new JPanel(new BorderLayout()){
-		Image backgroundImage = Images.MATCH_BG;
+		// Image backgroundGif = Images.MATCH_BG_GIF;
+		// Timer timer = new Timer(1000/15, e -> {revalidate(); repaint();});
+		// {
+		// 	timer.start();
+		// }
 
-		@Override
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			g.drawImage(backgroundImage, 0, 0, this);
-		}
+		// @Override
+		// protected void paintComponent(Graphics g) {
+		// 	super.paintComponent(g);
+		// 	g.drawImage(backgroundGif, 0, 0, getWidth(), getHeight(), this);
+		// }
 	};
+
 	private final TopCard topCardComponent = new TopCard();
 	private final JLabel handsLabel = new JLabel("Hands: -");
 	private final JButton drawButton = new JButton("Draw");
 	private final JButton playButton = new JButton("Play Card");
 	private final JButton skipButton = new JButton("Skip Turn");
+	private final JLabel bgLabel;
 	private final DuoRaceTarget raceTarget = new DuoRaceTarget();
 	private boolean drawRemaining = false;
 	//used to detected when my turn starts, in case the server sends multiple state updates in one turn
@@ -338,6 +345,8 @@ public class MatchPanel extends JPanel{
 		setSize(Dimensions.WIDTH, Dimensions.HEIGHT);
 
 		layoutWrapper.setSize(Dimensions.WIDTH, Dimensions.HEIGHT);
+		layoutWrapper.setOpaque(false);
+		layoutWrapper.setDoubleBuffered(true);
 
 		setLayout(null);
 
@@ -353,7 +362,7 @@ public class MatchPanel extends JPanel{
 
 		JPanel bottomWrapper = new JPanel(new BorderLayout());
 		bottomWrapper.setOpaque(false);
-		bottomWrapper.add(handsLabel, BorderLayout.NORTH);
+		// bottomWrapper.add(handsLabel, BorderLayout.NORTH);
 		handPanel.setOpaque(true);
 
 		JScrollPane handScrollPane = new JScrollPane(handPanel, 
@@ -371,6 +380,12 @@ public class MatchPanel extends JPanel{
 		drawButton.setEnabled(false);
 		playButton.setEnabled(false);
 		skipButton.setEnabled(false);
+
+		bgLabel = new JLabel(new ImageIcon(Images.MATCH_BG_GIF));
+		bgLabel.setBounds(0,0, Constants.Constants.Dimensions.WIDTH, Constants.Constants.Dimensions.HEIGHT);
+		bgLabel.setOpaque(false);
+		add(bgLabel);
+		setComponentZOrder(bgLabel, getComponentCount()-1); //send to back
 
 		layoutWrapper.setBounds(0,0, Constants.Constants.Dimensions.WIDTH, Constants.Constants.Dimensions.HEIGHT - 35);
 		add(layoutWrapper);
@@ -437,6 +452,12 @@ public class MatchPanel extends JPanel{
 				attachClient(gc);
 			}
 		} catch (Exception ignored) {}
+	}
+
+	@Override
+	protected void paintChildren(Graphics g) {
+		setComponentZOrder(bgLabel, getComponentCount()-1); 
+		super.paintChildren(g);
 	}
 
 	private boolean hasSelectedLegalCard(Messages.DuoCard top) {

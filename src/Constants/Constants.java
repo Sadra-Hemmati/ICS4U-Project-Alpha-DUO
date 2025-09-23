@@ -65,6 +65,10 @@ public class Constants {
         public static final Image MATCH_BG = loadImage("/Assets/Match_BG.png")
                 .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
 
+        public static final Image MATCH_BG_GIF = loadImage("/Assets/Duo_BG_Gif.gif")
+                .getScaledInstance(Dimensions.WIDTH, Dimensions.HEIGHT, Image.SCALE_DEFAULT);
+
+
         public static final Image DUO_CARD_BACK = loadImage("/Assets/Duo_Back.png");
 
         // Card images, format: "red_5", "blue_skip", "wild_draw4", etc.
