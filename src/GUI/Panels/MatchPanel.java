@@ -128,14 +128,27 @@ public class MatchPanel extends JPanel{
 				x += cw + gap;
 			}
 		}
+
 		@Override
 		public Dimension getPreferredSize() {
 			int n = getComponentCount();
 			int w = n * cardW + (n + 1) * 4;
-			if (cwRotation == 90 || cwRotation == 270) {
+
+			int rot = Math.abs(cwRotation % 360);
+			if (rot == 90 || rot == 270) {
 				return new Dimension(cardH + 30, w);
 			}
 			return new Dimension(w, cardH + 30);
+		}
+
+		@Override
+		public Dimension getMinimumSize() {
+			return getPreferredSize();
+		}
+
+		@Override
+		public Dimension getMaximumSize() {
+			return getPreferredSize();
 		}
 
 		@Override
